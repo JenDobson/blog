@@ -163,7 +163,16 @@ fig.savefig(os.path.join(figure_directory,'fig0.png'))
 #%%
 ax.set_xticks([1,2])
 ax.set_yticks([1])
-
+a1.set_visible(False)
+b1.set_visible(False)
+c1.set_visible(False)
+a2.set_visible(False)
+b2.set_visible(False)
+c2.set_visible(False)
+a3.set_visible(False)
+b3.set_visible(False)
+c3.set_visible(False)
+fig.savefie(os.path.join(figure_directory,'fig1.png'))
 
 #%%
 trans_data = Affine2D().rotate_deg(-15) + ax.transData
