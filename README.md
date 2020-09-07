@@ -1,2 +1,2 @@
 # blog
-Code from [blog posts](jendobson.com).
+Code from [blog posts](http://jendobson.com).
