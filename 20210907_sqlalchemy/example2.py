@@ -1,20 +1,12 @@
-'''
-Example1:  Basic BuyTransaction -- Lot -- SellTransaction relationship.
-
-To run:
-    python example1.py
-'''
-
 from sqlalchemy import Column, ForeignKey, Integer
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from sqlalchemy import create_engine
+from sqlalchemy import event
 
 Base = declarative_base()
 
 '''
-Demonstrate the basic relationship structure.
-No inheritance: Start with separate BuyTransaction and SellTransaction class.
-Lots are not automatically created when BuyTransaction is created.
+Now, make it a little more interesting by creating the lot when a BuyTransaction is created.  
 '''
 
 class BuyTransaction(Base):
@@ -23,6 +15,12 @@ class BuyTransaction(Base):
     buy_transaction_id = Column(Integer, primary_key=True)
     purchased_lot = relationship("Lot",back_populates='buy_transaction',
                                  uselist=False)
+
+@event.listens_for(BuyTransaction, "after_insert")
+def after_insert(mapper,connection,instance):
+    connection.execute(instance.metadata.tables['lot'].insert(),
+                       {"buy_transaction_id":instance.buy_transaction_id})
+
 class SellTransaction(Base):
     __tablename__ = 'sell_transaction'
 
@@ -35,15 +33,16 @@ class Lot(Base):
     __tablename__ = 'lot'
 
     # Each lot has one non-null buy transaction and zero or one sell transactions
-    # primary key of lot is the buy_transaction_id since the lot uniquely maps onto the BuyTransaction.  
-    # (SellTransaction is unique or None, so don't use as primary key.)
-
+    # Creation of a buy transaction should create a lot
     buy_transaction_id = Column(Integer,
                                 ForeignKey('buy_transaction.buy_transaction_id'),
                                 primary_key=True)
 
     sell_transaction_id = Column(Integer,
                                  ForeignKey('sell_transaction.sell_transaction_id'))
+
+
+
 
     buy_transaction = relationship(BuyTransaction,
                                    back_populates='purchased_lot')
@@ -56,16 +55,25 @@ class Lot(Base):
 
 
 
-engine = create_engine('sqlite+pysqlite:///:memory:')
+engine = create_engine('sqlite+pysqlite:///:memory:',future=True)
 Base.metadata.create_all(engine)
+DBSession = sessionmaker(bind=engine)
+session=DBSession()
 
 b = BuyTransaction()
 s = SellTransaction()
-l = Lot()
-
-l.buy_transaction = b
-l.sell_transaction = s
+l = b.purchased_lot
 
 print('\n\nb: ',b,'\n')
 print('s: ',s,'\n')
 print('l: ',l,'\n')
+
+print('\n==================ADDING AND COMMITTING TO DATABASE===============\n')
+session.add_all([b,s])
+session.commit()
+
+l = b.purchased_lot
+
+print('l: ',l,'\n')
+
+
