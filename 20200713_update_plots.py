@@ -10,7 +10,7 @@ import datetime
 
 
 sddata = sdcv19.get_county_newcases()
-
+#import pdb; pdb.set_trace()
 z = sddata['TOTAL']
 
 
