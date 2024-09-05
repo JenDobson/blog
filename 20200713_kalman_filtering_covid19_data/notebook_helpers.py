@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from numpy.polynomial import polynomial as P
 
 
-CSVFILEPATH = os.path.join('/Users/jen/projects/covid19-san-diego/csv','sandiego_data_by_zipcode.csv')
+CSVFILEPATH = os.path.join(os.path.dirname(__file__),'sandiego_data_by_zipcode.csv')
 
 
 def plot_figure1(estimate_df):
